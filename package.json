@@ -1,0 +1,16 @@
+{
+  "name": "imperio-crm2",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Imperio CRM — tu CRM propio, gratis, en tu cuenta de Cloudflare. Captura leads desde tu landing y míralos en una Torre de Control visual. Sin mensualidades.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260101.0",
+    "typescript": "^5.7.0",
+    "wrangler": "^4.100.0"
+  }
+}

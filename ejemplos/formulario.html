@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!-- ============================================================
+  IMPERIO CRM · Formulario de ejemplo
+  Un formulario listo para capturar leads y mandarlos a TU CRM.
+
+  CÓMO USARLO (2 opciones):
+  1) Tal cual: cambia CRM_URL aquí abajo por la dirección de tu
+     Worker y sube este archivo a cualquier hosting.
+  2) Dentro de tu landing: copia el <form> y el <script> a tu
+     página y ajusta los estilos a tu marca.
+
+  BONUS: guarda de dónde vino cada lead (utm_source, utm_campaign,
+  utm_content) con atribución de PRIMER toque — así sabrás qué
+  anuncio trajo a cada persona, igual que un CRM de pago.
+============================================================ -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Déjame tus datos</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#09090a;color:#f4f2ee;font-family:system-ui,sans-serif;padding:20px;box-sizing:border-box;}
+  .card{width:100%;max-width:400px;background:linear-gradient(180deg,#131316,#0d0d10);border:1px solid rgba(205,182,140,0.3);border-radius:20px;padding:32px 28px;}
+  h1{font-size:20px;margin:0 0 6px;}
+  p{color:#8f8d88;font-size:13.5px;margin:0 0 20px;line-height:1.55;}
+  input{width:100%;box-sizing:border-box;padding:13px 15px;border-radius:11px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);color:#f4f2ee;font-size:14.5px;outline:none;margin-bottom:11px;font-family:inherit;}
+  input:focus{border-color:rgba(205,182,140,0.6);}
+  button{width:100%;padding:14px;border:0;border-radius:999px;background:linear-gradient(180deg,#f6edd6,#cdb68c 60%,#b89b64);color:#0b0b0c;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;}
+  .err{color:#e6a99a;font-size:13px;min-height:17px;margin:2px 0 8px;}
+  .oculto{display:none;}
+  .listo{text-align:center;padding:30px 0 20px;}
+  .listo .check{font-size:44px;margin-bottom:10px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div id="paso1">
+      <h1>Déjame tus datos 👇</h1>
+      <p>Y te llega de una — sin spam, prometido.</p>
+      <form id="f">
+        <input id="fNombre" type="text" placeholder="Tu nombre" autocomplete="name">
+        <input id="fCorreo" type="email" placeholder="Tu mejor correo" autocomplete="email">
+        <input id="fTel" type="tel" placeholder="Tu WhatsApp (con código de país)" autocomplete="tel">
+        <div id="fErr" class="err"></div>
+        <button type="submit">Quiero acceso →</button>
+      </form>
+    </div>
+    <div id="paso2" class="listo oculto">
+      <div class="check">✅</div>
+      <h1>¡Listo! Quedaste registrado.</h1>
+      <p>Revisa tu correo (y la carpeta de promociones, por si acaso).</p>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // 👇 CAMBIA ESTO por la dirección de TU CRM (sin barra al final)
+  var CRM_URL = 'https://imperio-crm.TU-SUBDOMINIO.workers.dev';
+
+  // --- Atribución de primer toque: guardamos las UTM de la PRIMERA visita ---
+  var UTM_LS = 'crm_utm_primer_toque';
+  function utmPrimerToque(){
+    try{
+      var guardado = localStorage.getItem(UTM_LS);
+      if(guardado) return guardado;
+      var ps = new URLSearchParams(location.search);
+      var partes = [ps.get('utm_source'), ps.get('utm_campaign'), ps.get('utm_content')]
+        .filter(function(x){ return x && x.trim(); });
+      var origen = partes.length ? 'web:' + partes.join(' · ') : 'web:directo';
+      localStorage.setItem(UTM_LS, origen);
+      return origen;
+    }catch(e){ return 'web:directo'; }
+  }
+  utmPrimerToque(); // se guarda apenas carga la página
+
+  document.getElementById('f').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var nombre = document.getElementById('fNombre').value.trim();
+    var correo = document.getElementById('fCorreo').value.trim();
+    var tel = document.getElementById('fTel').value.trim();
+    var err = document.getElementById('fErr');
+    if(!correo && !tel){ err.textContent = 'Pon al menos tu correo o tu WhatsApp.'; return; }
+    err.textContent = '';
+
+    fetch(CRM_URL + '/lead', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        channel: 'web',
+        name: nombre || null,
+        email: correo || null,
+        phone: tel || null,
+        source: utmPrimerToque()
+      })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d.ok){
+        document.getElementById('paso1').classList.add('oculto');
+        document.getElementById('paso2').classList.remove('oculto');
+      } else {
+        err.textContent = 'Algo falló. Intenta de nuevo.';
+      }
+    }).catch(function(){
+      err.textContent = 'No pude conectar. Revisa tu internet e intenta de nuevo.';
+    });
+  });
+})();
+</script>
+</body>
+</html>

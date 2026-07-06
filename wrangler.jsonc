@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Nombre de tu Worker (la dirección será: imperio-crm.TU-SUBDOMINIO.workers.dev)
+  "name": "imperio-crm2",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01",
+  "observability": { "enabled": true },
+
+  // La base de datos donde viven tus leads (Cloudflare D1, plan gratis).
+  // El "database_id" de abajo es de RELLENO. Se cambia al instalar:
+  //   - Con el botón "Deploy to Cloudflare": se crea y se llena SOLO. No toques nada.
+  //   - A mano o con Claude: corre `npx wrangler d1 create imperio-crm-db`
+  //     y pega aquí el id que te devuelve.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "imperio-crm-db",
+      "database_id": "853eb4f1-3ff2-4bde-9c0e-1191347d0598"
+    }
+  ],
+
+  // ---- Personaliza tu CRM aquí (sin tocar código) ----
+  "vars": {
+    // El nombre de TU negocio (aparece en la Torre de Control).
+    "BUSINESS_NAME": "Mi Negocio",
+    // Color de la marca en formato hex. El dorado Imperio por defecto.
+    "BRAND_COLOR": "#cdb68c",
+    // Tu zona horaria (para que "hoy" sea TU hoy).
+    // Ejemplos: America/Bogota, America/Mexico_City, America/Argentina/Buenos_Aires,
+    //           America/Lima, America/Santiago, Europe/Madrid
+    "TIMEZONE": "America/Bogota"
+  }
+
+  // SECRETO OPCIONAL (avanzado): si prefieres fijar la clave de la Torre por consola
+  // en vez de crearla en la primera visita, corre:
+  //   printf '%s' 'TU-CLAVE' | npx wrangler secret put TORRE_KEY
+}
